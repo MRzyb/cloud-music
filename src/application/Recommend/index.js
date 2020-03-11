@@ -1,19 +1,26 @@
 import React, {useEffect} from "react";
 import {connect} from 'react-redux'
+import {forceCheck} from 'react-lazyload'
 import Slider from "../../components/Slider";
 import RecommendList from "../../components/list";
 import Scroll from "../../baseUI/scroll";
 import {Content} from "./style";
 import * as actionTypes from './store/actionCreators'
+import Loading from "../../baseUI/loading";
 
 function Recommend(props) {
 
-    const {bannerList, recommendList} = props
+    const {bannerList, recommendList, enterLoading} = props
     const {getBannerDataDispatch, getRecommendListDataDispatch} = props
 
     useEffect(() => {
-        getBannerDataDispatch()
-        getRecommendListDataDispatch()
+        // 如果页面有数据则不发起请求
+        if (!bannerList.size) {
+            getBannerDataDispatch()
+        }
+        if (!recommendList.size) {
+            getRecommendListDataDispatch()
+        }
         // eslint-disable-next-line
     }, [])
 
@@ -21,20 +28,23 @@ function Recommend(props) {
     const recommendListJS = recommendList ? recommendList.toJS() : []
 
     return <Content>
-        <Scroll>
+        <Scroll onScroll={forceCheck}>
             <div>
                 <Slider bannerList={bannerListJS}></Slider>
                 <RecommendList recommendList={recommendListJS}></RecommendList>
             </div>
         </Scroll>
+        {enterLoading ? <Loading></Loading> : null}
     </Content>
 }
+
 // 映射 redux 全局的 state 到组件的 props 上
 const mapStateToProps = (state) => {
 // 不要在这里用 toJS 不然每次 diff 对比 props 的时候都是不一样的引用 会导致不必要的重复渲染 属于滥用 immutable
     return {
         bannerList: state.getIn(['recommend', 'bannerList']),
-        recommendList: state.getIn(['recommend', 'recommendList'])
+        recommendList: state.getIn(['recommend', 'recommendList']),
+        enterLoading: state.getIn(['recommend', 'enterLoading'])
     }
 }
 
