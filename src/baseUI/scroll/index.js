@@ -1,20 +1,40 @@
-import React, {useEffect, useImperativeHandle, useRef, useState, forwardRef} from "react";
+import React, {useEffect, useImperativeHandle, useRef, useState, forwardRef, useMemo} from "react";
 import PropTypes from 'prop-types'
 import BScroll from 'better-scroll'
 import styled from 'styled-components'
+import Loading from "../loading";
+import LoadingV2 from "../loading-v2";
+import {debounce} from "../../api/utils";
 
 const ScrollContainer = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
 `
+const PullUpLoading = styled.div`
+  position: absolute;
+  left:0; right:0;
+  bottom: 5px;
+  width: 60px;
+  height: 60px;
+  margin: auto;
+  z-index: 100;
+`;
+
+export const PullDownLoading = styled.div`
+  position: absolute;
+  left:0; right:0;
+  top: 0px;
+  height: 30px;
+  margin: auto;
+  z-index: 100;
+`;
 
 
 const Scroll = forwardRef((props, ref) => {
     // bScroll 实例对象
     const [bScroll, setBScroll] = useState()
     const scrollContainerRef = useRef()
-    // eslint-disable-next-line no-unused-vars
     const {direction, click, refresh, pullUpLoading, pullDownLoading, bounceTop, bounceBottom} = props
     const {pullUp, pullDown, onScroll} = props
 
@@ -39,8 +59,8 @@ const Scroll = forwardRef((props, ref) => {
 
     //  每次渲染都要重新刷新实例，防止无法滑动
     useEffect(() => {
-        if (refresh && bScroll){
-            bScroll.refresh ();
+        if (refresh && bScroll) {
+            bScroll.refresh();
         }
     })
 
@@ -55,31 +75,42 @@ const Scroll = forwardRef((props, ref) => {
         }
     }, [bScroll, onScroll])
 
+    let pullUpDebounce = useMemo(() => {
+        return debounce(pullUp, 300)
+    }, [pullUp])
+
+    let pullDownDebounce = useMemo(() => {
+        return debounce(pullDown, 300)
+    }, [pullDown]);
+
     // 进行上拉到底的判断，调用上拉加载的函数
     useEffect(() => {
         if (!bScroll || !pullUp) return
-        bScroll.on('scrollEnd', () => {
+        const handlePullUp = () => {
             if (bScroll.y <= bScroll.maxScrollY + 100) {
-                pullUp()
+                pullUpDebounce()
             }
-        })
-        return () => {
-            bScroll.off('scrollEnd')
         }
-    }, [bScroll, pullUp])
+        bScroll.on('scrollEnd', handlePullUp)
+        return () => {
+            bScroll.off('scrollEnd', handlePullUp)
+        }
+    }, [bScroll, pullUp, pullUpDebounce])
 
     // 进行下拉到底的判断 调用下拉刷新函数
     useEffect(() => {
         if (!bScroll || !pullDown) return
-        bScroll.on('touchEnd', (pos) => {
+        const handlePullDown = (pos) => {
             if (pos.y > 50) {
-                pullDown()
+                pullDownDebounce()
             }
-        })
-        return () => {
-            bScroll.off('touchEnd')
         }
-    }, [bScroll, pullDown])
+        bScroll.on('touchEnd', handlePullDown)
+
+        return () => {
+            bScroll.off('touchEnd', handlePullDown)
+        }
+    }, [bScroll, pullDown, pullDownDebounce])
 
     // 向父组件暴露 refresh 方法 和bs实例
     // 一般和 forwardRef 一起使用，ref 已经在 forWardRef 中默认传入
@@ -97,9 +128,16 @@ const Scroll = forwardRef((props, ref) => {
         }
     }))
 
+    const pullUpDisplayStyle = pullUpLoading ? {display: ''} : {display: 'none'}
+    const pullDownDisplayStyle = pullDownLoading ? {display: ''} : {display: 'none'}
+
     return (
         <ScrollContainer ref={scrollContainerRef}>
             {props.children}
+            {/* 滑到底部加载动画 */}
+            <PullUpLoading style={pullUpDisplayStyle}><Loading></Loading></PullUpLoading>
+            {/* 顶部下拉刷新动画 */}
+            <PullDownLoading style={pullDownDisplayStyle}><LoadingV2></LoadingV2></PullDownLoading>
         </ScrollContainer>
     )
 
