@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {connect} from 'react-redux'
 import LazyLoad, {forceCheck} from 'react-lazyload'
 import Horizontal from "../../baseUI/horizontal-item";
@@ -16,27 +16,34 @@ import {
     changePageCount
 } from './store/actionCreators'
 import Loading from "../../baseUI/loading";
+import {CategoryDataContext, CHANGE_ALPHA, CHANGE_CATEGORY} from "./data";
 
 function Singers(props) {
 
     const {singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount} = props
     const {getHotSingerListDispatch, updateDispatch, pullUpDispatch, pullDownDispatch} = props
 
-    let [category, setCategory] = useState('')
-    let [alpha, setAlpha] = useState('')
+    // let [category, setCategory] = useState('')
+    // let [alpha, setAlpha] = useState('')
+    const {data, dispatch} = useContext(CategoryDataContext)
+    const {category, alpha} = data.toJS()
 
     const updateCategory = useCallback(val => {
-        setCategory(val)
+        // setCategory(val)
+        dispatch({type: CHANGE_CATEGORY, data: val})
         updateDispatch(val, alpha)
-    }, [alpha, updateDispatch])
+    }, [alpha, dispatch, updateDispatch])
 
     const updateAlpha = useCallback(val => {
-        setAlpha(val)
+        // setAlpha(val)
+        dispatch({type: CHANGE_ALPHA, data: val})
         updateDispatch(category, val)
-    }, [category, updateDispatch])
+    }, [category, dispatch, updateDispatch])
 
     useEffect(() => {
-        getHotSingerListDispatch()
+        if (!singerList.size) {
+            getHotSingerListDispatch()
+        }
         //  eslint-disable-next-line
     }, [])
 
@@ -49,7 +56,8 @@ function Singers(props) {
                     list.map((item, index) => {
                         return <ListItem key={item.picId + ' ' + index}>
                             <div className="img_wrapper">
-                                <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')} alt=""/>}>
+                                <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')}
+                                                            alt=""/>}>
                                     <img src={`${item.picUrl}?param=300x300`} width="100%" height="100%" alt="music"/>
                                 </LazyLoad>
                             </div>
