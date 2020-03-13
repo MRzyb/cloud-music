@@ -7,12 +7,11 @@ import Scroll from "../../baseUI/scroll";
 import {Content} from "./style";
 import * as actionTypes from './store/actionCreators'
 import Loading from "../../baseUI/loading";
+import {renderRoutes} from 'react-router-config'
 
 function Recommend(props) {
-
     const {bannerList, recommendList, enterLoading} = props
     const {getBannerDataDispatch, getRecommendListDataDispatch} = props
-
     useEffect(() => {
         // 如果页面有数据则不发起请求
         if (!bannerList.size) {
@@ -35,6 +34,7 @@ function Recommend(props) {
             </div>
         </Scroll>
         {enterLoading ? <Loading></Loading> : null}
+        {renderRoutes(props.route.routes)}
     </Content>
 }
 

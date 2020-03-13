@@ -15,7 +15,7 @@ function Rank(props) {
     let rankList = list ? list.toJS() : []
 
     useEffect(() => {
-        if (!list.size) {
+        if (!list || !list.size) {
             getRankListDataDispatch()
         }
         // eslint-disable-next-line
