@@ -1,5 +1,6 @@
 // 专辑
-import React, {useState, useRef, useCallback} from "react";
+import React, {useState, useRef, useCallback, useEffect} from "react";
+import {connect} from 'react-redux'
 import {Container, TopDesc, Menu, SongList, SongItem} from "./style";
 import {CSSTransition} from 'react-transition-group'
 import Header from "../../baseUI/header";
@@ -7,6 +8,7 @@ import Scroll from "../../baseUI/scroll";
 import {getCount, getName, isEmptyObject} from "../../api/utils";
 import Loading from "../../baseUI/loading";
 import style from '../../assets/global-style'
+import {getAlbumList, changeEntryLoading, changeCurrentAlbum} from "./store/actionCreators";
 
 function Album(props) {
     const [showStatus, setShowStatus] = useState(true)
@@ -14,97 +16,22 @@ function Album(props) {
     const [isMarquee, setIsMarquee] = useState(false) // 是否为跑马灯
     const headerEl = useRef();
 
+    const {getAlbumDetailDispatch, currentAlbum: currentAlbumImmutable, entryLoading} = props
+    const id = props.match.params.id
 
-    //mock 数据
-    const currentAlbum = {
-        creator: {
-            avatarUrl: "http://p1.music.126.net/O9zV6jeawR43pfiK2JaVSw==/109951164232128905.jpg",
-            nickname: "浪里推舟"
-        },
-        coverImgUrl: "http://p2.music.126.net/ecpXnH13-0QWpWQmqlR0gw==/109951164354856816.jpg",
-        subscribedCount: 2010711,
-        name: "听完就睡，耳机是天黑以后柔软的梦境",
-        tracks: [
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
-            {
-                name: "我真的受伤了",
-                ar: [{name: "张学友"}, {name: "周华健"}],
-                al: {
-                    name: "学友 热"
-                }
-            },
+    useEffect(() => {
+        getAlbumDetailDispatch(id)
+        //  eslint-disable-next-line
+    }, [])
 
-        ]
-    }
+    let currentAlbum = currentAlbumImmutable.toJS()
 
-    const handleBack = () => {
+    const handleBack = useCallback(() => {
         setShowStatus(false)
-    }
+    }, [])
 
-    //顶部的高度
-     const HEADER_HEIGHT = 45;
+    //顶部的高度handleScroll
+    const HEADER_HEIGHT = 45;
 
     const handleScroll = useCallback(
         pos => {
@@ -215,10 +142,27 @@ function Album(props) {
                         </div>
                     </Scroll>
                 ) : null}
-                {/*{ enterLoading ? <Loading></Loading> : null}*/}
+              <Loading show={entryLoading}></Loading>
             </Container>
         </CSSTransition>
     )
 }
 
-export default React.memo(Album)
+const mapStateToProps = state => {
+    return {
+        currentAlbum: state.getIn(['album', 'currentAlbum']),
+        entryLoading: state.getIn(['album', 'entryLoading'])
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        getAlbumDetailDispatch(id) {
+            dispatch(changeCurrentAlbum({}))
+            dispatch(changeEntryLoading(true))
+            dispatch(getAlbumList(id))
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Album))

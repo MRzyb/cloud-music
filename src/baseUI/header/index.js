@@ -25,6 +25,7 @@ const HeaderContainer = styled.div`
 // 处理函数组件拿不到ref的问题,所以用forwardRef
 const Header = React.forwardRef((props, ref) => {
     const {title, isMarquee, handleClick} = props
+    console.log('title')
     return (
         <HeaderContainer ref={ref}>
             <i className="iconfont back" onClick={handleClick}>&#xe655;</i>
@@ -38,8 +39,7 @@ const Header = React.forwardRef((props, ref) => {
 
 Header.defaultProps = {
     title: "标题",
-    handleClick: () => {
-    },
+    handleClick: () => {},
     isMarquee: false
 };
 

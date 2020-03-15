@@ -18,3 +18,7 @@ export const getSingerListAPI = (category, alpha, count) => {
 export const getRankListAPI = () => {
     return axiosInstance.get('/toplist/detail')
 }
+
+export const getAlbumDetailAPI = id => {
+    return axiosInstance.get(`/playlist/detail?id=${id}`);
+}
