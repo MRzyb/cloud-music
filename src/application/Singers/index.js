@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect} from "react";
 import {connect} from 'react-redux'
 import LazyLoad, {forceCheck} from 'react-lazyload'
 import Horizontal from "../../baseUI/horizontal-item";
@@ -17,6 +17,8 @@ import {
 } from './store/actionCreators'
 import Loading from "../../baseUI/loading";
 import {CategoryDataContext, CHANGE_ALPHA, CHANGE_CATEGORY} from "./data";
+import {renderRoutes} from 'react-router-config'
+
 
 function Singers(props) {
 
@@ -47,6 +49,10 @@ function Singers(props) {
         //  eslint-disable-next-line
     }, [])
 
+    const entryDetail = id => {
+        props.history.push(`/singers/${id}`)
+    }
+
     // 渲染歌手列表
     const renderSingerList = () => {
         const list = singerList ? singerList.toJS() : [];
@@ -54,7 +60,7 @@ function Singers(props) {
             <List>
                 {
                     list.map((item, index) => {
-                        return <ListItem key={item.picId + ' ' + index}>
+                        return <ListItem key={item.picId + ' ' + index} onClick={() => entryDetail(item.id)}>
                             <div className="img_wrapper">
                                 <LazyLoad placeholder={<img width="100%" height="100%" src={require('./singer.png')}
                                                             alt=""/>}>
@@ -95,6 +101,7 @@ function Singers(props) {
                 </Scroll>
                 <Loading show={enterLoading}></Loading>
             </ListContainer>
+            {renderRoutes(props.route.routes)}
         </div>
 
     )
