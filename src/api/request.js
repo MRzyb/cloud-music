@@ -22,3 +22,9 @@ export const getRankListAPI = () => {
 export const getAlbumDetailAPI = id => {
     return axiosInstance.get(`/playlist/detail?id=${id}`);
 }
+
+export const getSingerInfoAPI = id => {
+    return axiosInstance.get (`/artists?id=${id}`);
+}
+
+

@@ -1,96 +1,22 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {CSSTransition} from 'react-transition-group'
+import {connect} from 'react-redux'
 import {HEADER_HEIGHT} from "../../api/config";
 
 import Scroll from "../../baseUI/scroll";
 import Header from "../../baseUI/header";
 import SongsList from "../SongsList";
+import Loading from "../../baseUI/loading";
+import {getSingerInfo,  changeLoading} from "./store/actionCreators";
 
 import {ImgWrapper, Container, BgLayer, CollectButton, SongListWrapper} from './style'
 
 const Singer = (props) => {
     const [showStatus, setShowStatus] = useState(true)
-    const artist = {
-        picUrl: "https://p2.music.126.net/W__FCWFiyq0JdPtuLJoZVQ==/109951163765026271.jpg",
-        name: "薛之谦",
-        hotSongs: [
-            {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            }, {
-                name: "我好像在哪见过你",
-                ar: [{name: "薛之谦"}],
-                al: {
-                    name: "薛之谦专辑"
-                }
-            },
-            // 省略 20 条
-        ]
-    }
+    const {artist: artistImmutable, songs: songsImmutable, loading, getSingerDetailDispatch} = props
+
+    const artist = artistImmutable.toJS()
+    const songs = songsImmutable.toJS()
 
     const collectButton = useRef()
     const imageWrapper = useRef()
@@ -98,13 +24,16 @@ const Singer = (props) => {
     const songScroll = useRef();
     const header = useRef()
     const layer = useRef()
-
     const initialHeight = useRef(0)
 
     //  网上偏移尺寸 露出圆角
     const OFFSET = 5
 
     useEffect(() => {
+        const id = props.match.params.id
+        getSingerDetailDispatch(id)
+        console.log('id', id)
+
         let h = imageWrapper.current.offsetHeight;
         songScrollWrapper.current.style.top = `${h - OFFSET}px`
         initialHeight.current = h
@@ -112,7 +41,7 @@ const Singer = (props) => {
         layer.current.style.top = `${h - OFFSET}px`
         songScroll.current.refresh();
 
-    }, [])
+    }, [getSingerDetailDispatch, props.match.params.id])
 
     const handleScroll = useCallback(pos => {
         let height = initialHeight.current
@@ -141,7 +70,7 @@ const Singer = (props) => {
             // 按钮跟着移动且渐渐变透明
             buttonDOM.style["transform"] = `translate3d(0, ${newY}px, 0)`;
             buttonDOM.style["opacity"] = `${1 - percent * 2}`;
-        } else if (newY < minScrollY){
+        } else if (newY < minScrollY) {
             // 3.往上滑动 但是超过了header部分
             layerDOM.style.top = `${HEADER_HEIGHT}px`
             layerDOM.style.zIndex = 1;
@@ -153,6 +82,10 @@ const Singer = (props) => {
         }
     }, [])
 
+    const setShowStatusFalse = useCallback(() => {
+        setShowStatus(false);
+    }, []);
+
     return (
         <CSSTransition
             in={showStatus}
@@ -163,7 +96,7 @@ const Singer = (props) => {
             onExited={() => props.history.goBack()}
         >
             <Container>
-                <Header title={"头部"} ref={header}></Header>
+                <Header title={"头部"} ref={header} handleClick={setShowStatusFalse}></Header>
                 <ImgWrapper ref={imageWrapper} bgUrl={artist.picUrl}>
                     <div className="filter"></div>
                 </ImgWrapper>
@@ -175,14 +108,32 @@ const Singer = (props) => {
                 <SongListWrapper ref={songScrollWrapper}>
                     <Scroll ref={songScroll} onScroll={handleScroll}>
                         <SongsList
-                            songs={artist.hotSongs}
+                            songs={songs}
                             showCollect={false}
                         ></SongsList>
                     </Scroll>
                 </SongListWrapper>
+                { loading ? (<Loading></Loading>) : null}
             </Container>
         </CSSTransition>
     )
 }
 
-export default React.memo(Singer)
+const matStateToProps = state => {
+    return {
+        artist: state.getIn(['singerInfo', 'artist']),
+        songs: state.getIn(['singerInfo', 'songsOfArtist']),
+        loading: state.getIn(['singerInfo', 'loading'])
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        getSingerDetailDispatch(id) {
+            dispatch(changeLoading(true))
+            dispatch(getSingerInfo(id))
+        }
+    }
+}
+
+export default connect(matStateToProps, mapDispatchToProps)(React.memo(Singer))

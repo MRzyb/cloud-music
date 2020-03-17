@@ -214,4 +214,10 @@ export const RankTypes = {
     "23": "江小白YOLO云音乐说唱榜"
 };
 
+export const playMode = {
+    sequence: 0,
+    loop: 1,
+    random: 2
+}
+
 export const HEADER_HEIGHT = 45;
