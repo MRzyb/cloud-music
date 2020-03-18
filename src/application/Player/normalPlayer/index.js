@@ -10,6 +10,7 @@ import {
 } from "./style";
 import {CSSTransition} from 'react-transition-group'
 import animations from 'create-keyframe-animation'
+import {prefixStyle} from "../../../api/utils";
 
 function NormalPlayer(props) {
     const {song, fullScreen} = props;
@@ -70,6 +71,26 @@ function NormalPlayer(props) {
         cdWrapperDom.style.animation = "";
     };
 
+    const transform = prefixStyle('transform')
+
+    const leave = () => {
+        if (!cdWrapperRef.current) return;
+        const cdWrapperDom = cdWrapperRef.current;
+        cdWrapperDom.style.transition = "all 0.4s";
+        const { x, y, scale } = _getPosAndScale();
+        cdWrapperDom.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    };
+
+    const afterLeave = () => {
+        if (!cdWrapperRef.current) return;
+        const cdWrapperDom = cdWrapperRef.current;
+        cdWrapperDom.style.transition = "";
+        cdWrapperDom.style[transform] = "";
+        // 一定要注意现在要把 normalPlayer 这个 DOM 给隐藏掉，因为 CSSTransition 的工作只是把动画执行一遍
+        // 不置为 none 现在全屏播放器页面还是存在
+        normalPlayerRef.current.style.display = "none";
+    };
+
     return (
         <CSSTransition
             classNames="normal"
@@ -78,8 +99,8 @@ function NormalPlayer(props) {
             mountOnEnter
             onEnter={enter}
             onEntered={afterEnter}
-            //onExit={leave}
-            //onExited={afterLeave}
+            onExit={leave}
+            onExited={afterLeave}
         >
             <NormalPlayerContainer ref={normalPlayerRef}>
                 <div className="background">
@@ -92,7 +113,7 @@ function NormalPlayer(props) {
                 </div>
                 <div className="background layer"></div>
                 <Top className="top">
-                    <div className="back">
+                    <div className="back" onClick={() => toggleFullScreen(false)}>
                         <i className="iconfont icon-back">&#xe662;</i>
                     </div>
                     <h1 className="title">{song.name}</h1>
