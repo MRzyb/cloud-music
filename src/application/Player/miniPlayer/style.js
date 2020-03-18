@@ -20,44 +20,44 @@ export const MiniPlayerContainer = styled.div`
   width: 100%;
   height: 60px;
   background: ${style["highlight-background-color"]};
-  &.mini-enter {
+  &.mini-enter{
     transform: translate3d(0, 100%, 0);
   }
-  &.mini-enter-active {
+  &.mini-enter-active{
     transform: translate3d(0, 0, 0);
     transition: all 0.4s;
   }
-  &.mini-exit-active {
+  &.mini-exit-active{
     transform: translate3d(0, 100%, 0);
     transition: all .4s
   }
-  .icon {
+  .icon{
     flex: 0 0 40px;
     width: 40px;
     height: 40px;
     padding: 0 10px 0 20px;
-    .imgWrapper {
+    .imgWrapper{
       width: 100%;
       height: 100%;
-      img {
+      img{
         border-radius: 50%;
-        &.play {
+        &.play{
           animation: ${rotate} 10s infinite;
-          &.pause {
+          &.pause{
             animation-play-state: paused;
           }
         }
       }
     }
   }
-  .text {
+  .text{
     display: flex;
     flex-direction: column;
     justify-content: center;
     flex: 1;
     line-height: 20px;
     overflow: hidden;
-    .name {
+    .name{
       margin-bottom: 2px;
       font-size: ${style["font-size-m"]};
       color: ${style["font-color-desc"]};
@@ -69,19 +69,19 @@ export const MiniPlayerContainer = styled.div`
       ${style.noWrap()}
     }
   }
-  .control {
+  .control{
     flex: 0 0 30px;
     padding: 0 10px;
-    .iconfont, .icon-playlist {
+    .iconfont, .icon-playlist{
       font-size: 30px;
       color: ${style["theme-color"]};
     }
-    .icon-mini {
+    .icon-mini{
       font-size: 16px;
       position: absolute;
       left: 8px;
       top: 8px;
-      &.icon-play {
+      &.icon-play{
         left: 9px
       }
     }
