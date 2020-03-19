@@ -9,12 +9,19 @@ import {getCount, getName, isEmptyObject} from "../../api/utils";
 import Loading from "../../baseUI/loading";
 import style from '../../assets/global-style'
 import {getAlbumList, changeEntryLoading, changeCurrentAlbum} from "./store/actionCreators";
+import SongsList from "../SongsList";
+import MusicNote from "../../baseUI/music-note";
 
 function Album(props) {
     const [showStatus, setShowStatus] = useState(true)
     const [title, setTitle] = useState("歌单");
     const [isMarquee, setIsMarquee] = useState(false) // 是否为跑马灯
     const headerEl = useRef();
+    const musicNoteRef = useRef()
+
+    const musicAnimation = (x, y) => {
+        musicNoteRef.current.startAnimation({x, y})
+    }
 
     const {getAlbumDetailDispatch, currentAlbum: currentAlbumImmutable, entryLoading} = props
     const id = props.match.params.id
@@ -92,38 +99,6 @@ function Album(props) {
         )
     };
 
-    const renderSongList = () => {
-        return (
-            <SongList>
-                <div className="first_line">
-                    <div className="play_all">
-                        <i className="iconfont">&#xe6e3;</i>
-                        <span>播放全部 <span className="sum">(共{currentAlbum.tracks.length}首)</span></span>
-                    </div>
-                    <div className="add_list">
-                        <i className="iconfont">&#xe62d;</i>
-                        <span>收藏({getCount(currentAlbum.subscribedCount)})</span>
-                    </div>
-                </div>
-                <SongItem>
-                    {
-                        currentAlbum.tracks.map((item, index) => {
-                            return (
-                                <li key={index}>
-                                    <span className="index">{index + 1}</span>
-                                    <div className="info">
-                                        <span>{item.name}</span>
-                                        <span>{getName(item.ar)} - {item.al.name}</span>
-                                    </div>
-                                </li>
-                            )
-                        })
-                    }
-                </SongItem>
-            </SongList>
-        )
-    }
-
     return (
         <CSSTransition in={showStatus}
                        timeout={300}
@@ -138,11 +113,18 @@ function Album(props) {
                         <div>
                             {renderTopDesc()}
                             {renderMenu()}
-                            {renderSongList()}
+                            <SongsList
+                                songs={currentAlbum.tracks}
+                                collectCount={currentAlbum.subscribedCount}
+                                showCollect={true}
+                                showBackground={true}
+                                musicAnimation={musicAnimation}
+                            ></SongsList>
                         </div>
                     </Scroll>
                 ) : null}
-              <Loading show={entryLoading}></Loading>
+                <Loading show={entryLoading}></Loading>
+                <MusicNote ref={musicNoteRef}></MusicNote>
             </Container>
         </CSSTransition>
     )

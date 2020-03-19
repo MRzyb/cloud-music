@@ -7,7 +7,8 @@ import Scroll from "../../baseUI/scroll";
 import Header from "../../baseUI/header";
 import SongsList from "../SongsList";
 import Loading from "../../baseUI/loading";
-import {getSingerInfo,  changeLoading} from "./store/actionCreators";
+import {getSingerInfo, changeLoading} from "./store/actionCreators";
+import MusicNote from "../../baseUI/music-note";
 
 import {ImgWrapper, Container, BgLayer, CollectButton, SongListWrapper} from './style'
 
@@ -25,6 +26,12 @@ const Singer = (props) => {
     const header = useRef()
     const layer = useRef()
     const initialHeight = useRef(0)
+
+    const musicNoteRef = useRef()
+
+    const musicAnimation = (x, y) => {
+        musicNoteRef.current.startAnimation({x, y})
+    }
 
     //  网上偏移尺寸 露出圆角
     const OFFSET = 5
@@ -110,10 +117,12 @@ const Singer = (props) => {
                         <SongsList
                             songs={songs}
                             showCollect={false}
+                            musicAnimation={musicAnimation}
                         ></SongsList>
                     </Scroll>
                 </SongListWrapper>
-                { loading ? (<Loading></Loading>) : null}
+                {loading ? (<Loading></Loading>) : null}
+                <MusicNote ref={musicNoteRef}></MusicNote>
             </Container>
         </CSSTransition>
     )

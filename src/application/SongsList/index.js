@@ -3,11 +3,14 @@ import {connect} from 'react-redux'
 import {SongList, SongItem} from "./style";
 import {getName} from '../../api/utils';
 import {changePlayList, changeCurrentIndex, changeSequencePlayList} from "../Player/store/actionCreators";
+import MusicNote from "../../baseUI/music-note";
 
 const SongsList = React.forwardRef((props, refs) => {
 
     const {collectCount, showCollect, songs} = props;
     const { changePlayListDispatch, changeCurrentIndexDispatch, changeSequencePlayListDispatch } = props;
+    // 接受触发动画的函数
+    const { musicAnimation } = props;
 
     const totalCount = songs.length;
 
@@ -15,6 +18,7 @@ const SongsList = React.forwardRef((props, refs) => {
         changePlayListDispatch(songs);
         changeSequencePlayListDispatch(songs);
         changeCurrentIndexDispatch(index);
+        musicAnimation(e.nativeEvent.clientX, e.nativeEvent.clientY);
     }
 
     let songList = (list) => {
@@ -59,6 +63,7 @@ const SongsList = React.forwardRef((props, refs) => {
             <SongItem>
                 {songList(songs)}
             </SongItem>
+            <MusicNote></MusicNote>
         </SongList>
     )
 });
